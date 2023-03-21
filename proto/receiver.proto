@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package api.simulator;
+
+option go_package = "./proto;simulator";
+
+service Receiver {
+  rpc SetReceiverNum(SetReceiverNumRequest) returns (SetReceiverNumResponse) {}
+  rpc Recv (RecvRequest) returns (RecvResponse);
+}
+
+message SetReceiverNumRequest {
+  uint32 num = 1;
+};
+
+message SetReceiverNumResponse{};
+
+message RecvRequest {
+  uint32 msg_id = 1;
+  bytes message = 2;
+  string sender_id = 3;
+  string receiver_id = 4;
+}
+
+message RecvResponse {}

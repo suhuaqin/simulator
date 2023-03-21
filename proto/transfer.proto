@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package api.simulator;
+
+option go_package = "./proto;simulator";
+
+service Transfer {
+  rpc Transfer (TransferRequest) returns (TransferResponse);
+  rpc SetDiscard(SetDiscardRequest) returns (SetDiscardResponse);
+}
+
+message TransferRequest {
+  uint32 msg_id = 1;
+  bytes message = 2;
+  string receiver_id = 3;
+  string sender_id = 4;
+}
+
+message TransferResponse {}
+
+message SetDiscardRequest {
+  // rand.Int() % remainder < discard_le 时消息丢弃, discard_le < 0 时不丢弃消息
+  uint32 remainder = 1;
+  int64 discard_le = 2;
+}
+
+message SetDiscardResponse {}
+
