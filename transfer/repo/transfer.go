@@ -2,9 +2,9 @@ package repo
 
 import (
 	"context"
-	pb "simulator/proto"
+	"simulator/frame/etcdKey"
 )
 
 type TransferRepository interface {
-	GetReceiverRegistry(ctx context.Context) (*pb.ReceiverRegistry, error)
+	GetNode(ctx context.Context) (etcdKey.NodeRegistryDataMap, error)
 }

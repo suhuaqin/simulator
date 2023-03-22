@@ -5,15 +5,9 @@ import (
 	pb "simulator/proto"
 )
 
-const SenderServiceName = "sender"
-const ReceiverServiceName = "receiver"
+const NodeServiceName = "node"
 
-func NewSenderClient(srv micro.Service) pb.SenderService {
-	s := pb.NewSenderService(SenderServiceName, srv.Client())
-	return s
-}
-
-func NewReceiverClient(srv micro.Service) pb.ReceiverService {
-	s := pb.NewReceiverService(ReceiverServiceName, srv.Client())
+func NewNodeClient(srv micro.Service) pb.NodeService {
+	s := pb.NewNodeService(NodeServiceName, srv.Client())
 	return s
 }

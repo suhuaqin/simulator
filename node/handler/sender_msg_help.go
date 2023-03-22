@@ -15,9 +15,9 @@ func NewMsgIDHelp() *msgIDHelp {
 	}
 }
 
-func (m *msgIDHelp) AddMsgID(nodeID string) uint32 {
+func (m *msgIDHelp) NewMsgID(receiverID string) uint32 {
 	m.l.Lock()
 	defer m.l.Unlock()
-	m.msgID[nodeID]++
-	return m.msgID[nodeID]
+	m.msgID[receiverID]++
+	return m.msgID[receiverID]
 }

@@ -6,7 +6,7 @@ import (
 	"go-micro.dev/v4/selector"
 )
 
-func NodeID(nodeID string) client.CallOption {
+func ServiceID(nodeID string) client.CallOption {
 	filter := func(services []*registry.Service) []*registry.Service {
 		var filtered []*registry.Service
 

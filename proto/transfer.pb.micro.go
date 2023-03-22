@@ -38,6 +38,7 @@ func NewTransferEndpoints() []*api.Endpoint {
 type TransferService interface {
 	Transfer(ctx context.Context, in *TransferRequest, opts ...client.CallOption) (*TransferResponse, error)
 	SetDiscard(ctx context.Context, in *SetDiscardRequest, opts ...client.CallOption) (*SetDiscardResponse, error)
+	Broadcast(ctx context.Context, in *BroadcastRequest, opts ...client.CallOption) (*BroadcastResponse, error)
 }
 
 type transferService struct {
@@ -72,17 +73,29 @@ func (c *transferService) SetDiscard(ctx context.Context, in *SetDiscardRequest,
 	return out, nil
 }
 
+func (c *transferService) Broadcast(ctx context.Context, in *BroadcastRequest, opts ...client.CallOption) (*BroadcastResponse, error) {
+	req := c.c.NewRequest(c.name, "Transfer.Broadcast", in)
+	out := new(BroadcastResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for Transfer service
 
 type TransferHandler interface {
 	Transfer(context.Context, *TransferRequest, *TransferResponse) error
 	SetDiscard(context.Context, *SetDiscardRequest, *SetDiscardResponse) error
+	Broadcast(context.Context, *BroadcastRequest, *BroadcastResponse) error
 }
 
 func RegisterTransferHandler(s server.Server, hdlr TransferHandler, opts ...server.HandlerOption) error {
 	type transfer interface {
 		Transfer(ctx context.Context, in *TransferRequest, out *TransferResponse) error
 		SetDiscard(ctx context.Context, in *SetDiscardRequest, out *SetDiscardResponse) error
+		Broadcast(ctx context.Context, in *BroadcastRequest, out *BroadcastResponse) error
 	}
 	type Transfer struct {
 		transfer
@@ -101,4 +114,8 @@ func (h *transferHandler) Transfer(ctx context.Context, in *TransferRequest, out
 
 func (h *transferHandler) SetDiscard(ctx context.Context, in *SetDiscardRequest, out *SetDiscardResponse) error {
 	return h.TransferHandler.SetDiscard(ctx, in, out)
+}
+
+func (h *transferHandler) Broadcast(ctx context.Context, in *BroadcastRequest, out *BroadcastResponse) error {
+	return h.TransferHandler.Broadcast(ctx, in, out)
 }

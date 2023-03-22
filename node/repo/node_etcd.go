@@ -9,23 +9,41 @@ import (
 	"time"
 )
 
-type TransferRepo struct {
+type nodeRepo struct {
 	cli              *clientv3.Client
 	nodeRegistryData etcdKey.NodeRegistryDataMap
 }
 
-func NewTransferRepo(etcdCli *clientv3.Client) *TransferRepo {
-	result := &TransferRepo{cli: etcdCli}
+func NewNodeRepo(etcdCli *clientv3.Client) *nodeRepo {
+	result := &nodeRepo{cli: etcdCli}
 	result.nodeRegistryData, _ = result.getNode(context.Background())
 	result.watchNode(context.Background())
 	return result
 }
 
-func (s *TransferRepo) GetNode(ctx context.Context) (etcdKey.NodeRegistryDataMap, error) {
+func (s *nodeRepo) SetNode(ctx context.Context, nodeID string, ttlSecond int64, registry etcdKey.NodeRegistryDataMap) error {
+	lease, err := s.cli.Grant(ctx, ttlSecond)
+	if err != nil {
+		return err
+	}
+	by, err := json.Marshal(registry)
+	if err != nil {
+		return err
+	}
+	_, err = s.cli.Put(ctx, etcdKey.NodeRegistryKey(nodeID), string(by), clientv3.WithLease(lease.ID))
+	return err
+}
+
+func (s *nodeRepo) GetNode(ctx context.Context) (etcdKey.NodeRegistryDataMap, error) {
 	return s.nodeRegistryData, nil
 }
 
-func (s *TransferRepo) watchNode(ctx context.Context) {
+func (s *nodeRepo) DelNode(ctx context.Context, nodeID string) error {
+	_, err := s.cli.Delete(ctx, etcdKey.NodeRegistryKey(nodeID))
+	return err
+}
+
+func (s *nodeRepo) watchNode(ctx context.Context) {
 	go func() {
 		defer func() {
 			if err := recover(); err != nil {
@@ -57,7 +75,7 @@ func (s *TransferRepo) watchNode(ctx context.Context) {
 	}()
 }
 
-func (s *TransferRepo) getNode(ctx context.Context) (etcdKey.NodeRegistryDataMap, error) {
+func (s *nodeRepo) getNode(ctx context.Context) (etcdKey.NodeRegistryDataMap, error) {
 	result := make(etcdKey.NodeRegistryDataMap)
 	resp, err := s.cli.Get(ctx, etcdKey.NodeRegistryKeyPrefix, clientv3.WithPrefix())
 	if err != nil {

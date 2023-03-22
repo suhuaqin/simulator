@@ -6,6 +6,7 @@ import (
 	"go-micro.dev/v4/logger"
 	"go-micro.dev/v4/registry"
 	"simulator/client/transfer_client"
+	"simulator/frame/logWrapper"
 	pb "simulator/proto"
 	"simulator/transfer/handler"
 	"simulator/transfer/repo"
@@ -13,19 +14,20 @@ import (
 
 func main() {
 	logger.Init(logger.WithLevel(logger.DebugLevel))
+	etcdEndpoint := "127.0.0.1:2379"
 
 	// create a new service
 	service := micro.NewService(
 		micro.Name(transfer_client.TransferServiceName),
 		micro.Registry(etcd.NewRegistry(
-			registry.Addrs("127.0.0.1:2379"),
+			registry.Addrs(etcdEndpoint),
 		)),
+		micro.WrapHandler(logWrapper.LogWrapper),
 	)
 
 	// initialise flags
 	service.Init()
 
-	etcdEndpoint := "127.0.0.1:2379"
 	etcdCli, err := repo.NewEtcdCli(etcdEndpoint)
 	if err != nil {
 		panic(err)
