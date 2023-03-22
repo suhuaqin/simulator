@@ -25,7 +25,7 @@ func NewNodeService(srv micro.Service, nodeRepo repo.NodeRepository, transportCl
 }
 
 func (s *NodeService) Send(ctx context.Context, request *pb.SendRequest, response *pb.SendResponse) error {
-	senderNode, exist := s.nodeHelp.GetNode("")
+	senderNode, exist := s.nodeHelp.GetNode(request.SenderId)
 	if !exist {
 		return errors.New("can not found senderNode")
 	}
@@ -74,8 +74,7 @@ func (s *NodeService) SetNodeCount(ctx context.Context, request *pb.SetNodeCount
 }
 
 func (s *NodeService) SetInterval(ctx context.Context, request *pb.SetIntervalRequest, response *pb.SetIntervalResponse) error {
-	s.nodeHelp.SetSenderInterval(request.SenderId, request.IntervalMillisecond)
-	return nil
+	return s.nodeHelp.SetSenderInterval(request.SenderId, request.IntervalMillisecond)
 }
 
 func (s *NodeService) Stop() {

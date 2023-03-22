@@ -192,6 +192,15 @@ func newNode(marshaler codec.Marshaler, nodeHandler pb.NodeHandler) *node {
 	}
 	result.baseCtx, result.cancel = context.WithCancel(context.Background())
 
+	go func() {
+		defer func() {
+			if err := recover(); err != nil {
+				logger.Error("[panic]", err)
+			}
+		}()
+		result.demonsAutoSend()
+	}()
+
 	return result
 }
 
@@ -214,7 +223,8 @@ func (n *node) demonsAutoSend() {
 		select {
 		case <-ticker.C:
 			err := n.nodeHandler.Send(context.Background(), &pb.SendRequest{
-				Message: autoMsg,
+				SenderId: n.id,
+				Message:  autoMsg,
 			}, &pb.SendResponse{})
 			if err != nil {
 				logger.Error(err)
